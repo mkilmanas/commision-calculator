@@ -59,6 +59,7 @@
     },
     "require-dev": {
         "behat/behat": "^3.5",
+        "behat/symfony2-extension": "^2.1",
         "phpspec/phpspec": "^5.1"
     }
 }

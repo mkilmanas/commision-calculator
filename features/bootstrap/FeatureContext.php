@@ -1,5 +1,6 @@
 <?php
 
+use App\CommissionCalculator;
 use App\Model\Currency;
 use App\Model\Transaction;
 use Behat\Behat\Context\Context;
@@ -12,6 +13,10 @@ use Behat\Gherkin\Node\TableNode;
 class FeatureContext implements Context
 {
     private $transactions = [];
+    /**
+     * @var CommissionCalculator
+     */
+    private $calculator;
 
     /**
      * Initializes context.
@@ -20,8 +25,9 @@ class FeatureContext implements Context
      * You can also pass arbitrary arguments to the
      * context constructor through behat.yml.
      */
-    public function __construct()
+    public function __construct(CommissionCalculator $calculator)
     {
+        $this->calculator = $calculator;
     }
 
     /**
@@ -47,7 +53,7 @@ class FeatureContext implements Context
      */
     public function iRunCommissionCalculation()
     {
-        throw new PendingException();
+        $this->calculator->calculateAllFees($this->transactions);
     }
 
     /**
@@ -56,6 +62,17 @@ class FeatureContext implements Context
      */
     public function iShouldGetTheResult(TableNode $table)
     {
-        throw new PendingException();
+        if (count($table->getColumnsHash()) !== count($this->transactions)) {
+            throw new \RuntimeException("The transaction count doesn't match the expected result count");
+        }
+
+        foreach ($table->getColumnsHash() as $i => $row)
+        {
+            $expected = floatval($row['commission_fee']);
+            $actual = $this->transactions[$i]->getFee();
+            if (abs($expected - $actual) > 0.0001) {
+                throw new \Exception("Result mismatch: expected '{$row['commission_fee']}' but found {$actual}");
+            }
+        }
     }
 }

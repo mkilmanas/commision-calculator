@@ -2,4 +2,10 @@ default:
     suites:
         default:
             contexts:
-                - FeatureContext: ~
+                - FeatureContext:
+                      calculator: '@App\CommissionCalculator'
+
+    extensions:
+        Behat\Symfony2Extension:
+            kernel:
+                class: 'App\Kernel'
