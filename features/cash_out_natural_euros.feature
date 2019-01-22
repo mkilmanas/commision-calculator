@@ -81,9 +81,9 @@ Feature: Calculation of commissions for cash-out for natural customers in base c
     Scenario: 1000 EUR limit is calculated for each calendar week separately
         Given there are transactions
             | date       | account_id | account_type | transaction_type | amount | currency |
-            | 2019-01-15 | 1          | natural      | cash_out         | 300.00 | EUR      |
-            | 2019-01-16 | 1          | natural      | cash_out         | 300.00 | EUR      |
-            | 2019-01-17 | 1          | natural      | cash_out         | 300.00 | EUR      |
+            | 2019-01-15 | 1          | natural      | cash_out         | 350.00 | EUR      |
+            | 2019-01-16 | 1          | natural      | cash_out         | 350.00 | EUR      |
+            | 2019-01-17 | 1          | natural      | cash_out         | 350.00 | EUR      |
             | 2019-01-18 | 1          | natural      | cash_out         | 300.00 | EUR      |
             | 2019-01-21 | 1          | natural      | cash_out         | 300.00 | EUR      |
         When I run commission calculation
@@ -91,8 +91,8 @@ Feature: Calculation of commissions for cash-out for natural customers in base c
             | commission_fee |
             | 0.00           |
             | 0.00           |
-            | 0.00           |
-            | 0.60           |
+            | 0.15           |
+            | 0.90           |
             | 0.00           |
 
     Scenario: 3 transaction limit is calculated for each calendar week separately
