@@ -7,6 +7,7 @@ use App\Model\AccountRegistry;
 use App\Model\Transaction;
 use App\Strategy\CashInFeeStrategy;
 use App\Strategy\FeeStrategyInterface;
+use App\Strategy\LegalCashOutFeeStrategy;
 
 class CommissionCalculator
 {
@@ -26,7 +27,8 @@ class CommissionCalculator
 
         if (empty($strategies)) {
             $this->strategies = [
-                new CashInFeeStrategy()
+                new CashInFeeStrategy(),
+                new LegalCashOutFeeStrategy(),
             ];
         } else {
             foreach ($strategies as $strategy) {

@@ -16,7 +16,7 @@ Feature: Calculation of commissions for cash-out for legal customers in base cur
     Scenario: Transaction fee is always at least 0.50 EUR
         Given there is a transaction
             | date       | account_id | account_type | transaction_type | amount   | currency |
-            | 2019-01-21 | 1          | natural      | cash_out          | 100.00   | EUR      |
+            | 2019-01-21 | 1          | legal        | cash_out         | 100.00   | EUR      |
         When I run commission calculation
         Then I should get the result
             | commission_fee |
