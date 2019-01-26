@@ -61,11 +61,12 @@ class NaturalCashOutFeeStrategy implements FeeStrategyInterface
 
     private function getThisWeekCashOutHistory(Account $account, Transaction $transaction) : Collection
     {
-        $weekCode = $transaction->getDate()->format('Y-W');
+        $transactionDate = $transaction->getDate();
         return $account->getTransactionHistory()->filter(
-            function (Transaction $t) use ($weekCode) {
+            function (Transaction $t) use ($transactionDate) {
                 return $t->getTransactionType() === Transaction::TYPE_CASH_OUT
-                    && $t->getDate()->format('Y-W') === $weekCode;
+                    && $t->getDate()->format('W') === $transactionDate->format('W')
+                    && $transactionDate->diff($t->getDate(), true)->days < 7;
             }
         );
     }

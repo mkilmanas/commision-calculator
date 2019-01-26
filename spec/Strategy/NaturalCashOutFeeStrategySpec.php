@@ -70,7 +70,7 @@ class NaturalCashOutFeeStrategySpec extends ObjectBehavior
         $transaction->getAmount()->willReturn(100);
         $transaction->getCurrency()->willReturn(Currency::EUR());
         $transaction->getDate()->willReturn($date);
-        $date->format('Y-W')->willReturn('2018-51');
+        $date->format('W')->willReturn('51');
         $account->getTransactionHistory()->willReturn(new ArrayCollection());
 
         $transaction->setFee(0.0)->shouldBeCalled();
@@ -91,7 +91,9 @@ class NaturalCashOutFeeStrategySpec extends ObjectBehavior
         $currentTransaction->getAmount()->willReturn(100);
         $currentTransaction->getCurrency()->willReturn(Currency::EUR());
         $currentTransaction->getDate()->willReturn($date);
-        $date->format('Y-W')->willReturn('2018-52');
+        $date->format('W')->willReturn('52');
+        $date->diff(Argument::type(\DateTimeInterface::class), true)
+            ->will(function ($params) { return $params[0]->diff(new \DateTime('2018-12-27'), true); });
 
         $currentTransaction->setFee(0.3)->shouldBeCalled();
 
@@ -111,7 +113,9 @@ class NaturalCashOutFeeStrategySpec extends ObjectBehavior
         $currentTransaction->getAmount()->willReturn(100);
         $currentTransaction->getCurrency()->willReturn(Currency::EUR());
         $currentTransaction->getDate()->willReturn($date);
-        $date->format('Y-W')->willReturn('2018-52');
+        $date->format('W')->willReturn('52');
+        $date->diff(Argument::type(\DateTimeInterface::class), true)
+            ->will(function ($params) { return $params[0]->diff(new \DateTime('2018-12-27'), true); });
 
         $currentTransaction->setFee(0.0)->shouldBeCalled();
 
@@ -142,7 +146,7 @@ class NaturalCashOutFeeStrategySpec extends ObjectBehavior
         $transaction->getAmount()->willReturn(1100);
         $transaction->getCurrency()->willReturn(Currency::USD());
         $transaction->getDate()->willReturn($date);
-        $date->format('Y-W')->willReturn('2018-51');
+        $date->format('W')->willReturn('51');
         $account->getTransactionHistory()->willReturn(new ArrayCollection());
 
         $euroForex->exchange(1100, Currency::USD(), Currency::EUR())->willReturn(956.77133);
@@ -170,5 +174,25 @@ class NaturalCashOutFeeStrategySpec extends ObjectBehavior
         $transaction->setFee(Argument::approximate(80.9999649, $e))->shouldBeCalled();
 
         $this->calculateFee($account, $transaction);
+    }
+
+    function it_considers_transactions_in_the_same_week_even_when_the_week_spans_different_years(
+        Transaction $currentTransaction,
+        \DateTimeImmutable $date
+    ) {
+        $account = new Account(1, Account::TYPE_NATURAL);
+
+        $account->addTransaction(new Transaction(new \DateTimeImmutable('2018-12-31'), 1, 'natural', 'cash_out', 800, Currency::EUR()));
+
+        $currentTransaction->getAmount()->willReturn(800);
+        $currentTransaction->getCurrency()->willReturn(Currency::EUR());
+        $currentTransaction->getDate()->willReturn($date);
+        $date->format('W')->willReturn('01');
+        $date->diff(Argument::type(\DateTimeInterface::class), true)
+            ->will(function ($params) { return $params[0]->diff(new \DateTime('2019-01-02'), true); });
+
+        $currentTransaction->setFee(1.8)->shouldBeCalled();
+
+        $this->calculateFee($account, $currentTransaction);
     }
 }
