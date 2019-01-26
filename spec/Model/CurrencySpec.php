@@ -20,42 +20,6 @@ class CurrencySpec extends ObjectBehavior
         $this->getCode()->shouldReturn('USD');
     }
 
-    function it_returns_exchange_rate_from_EUR_to_USD()
-    {
-        $this->beConstructedThrough('EUR');
-        $this->rateTo(Currency::USD())->shouldReturn(Currency::RATE_EUR_USD);
-    }
-
-    function it_returns_exchange_rate_from_EUR_to_JPY()
-    {
-        $this->beConstructedThrough('EUR');
-        $this->rateTo(Currency::JPY())->shouldReturn(Currency::RATE_EUR_JPY);
-    }
-
-    function it_returns_exchange_rate_from_USD_to_EUR()
-    {
-        $this->beConstructedThrough('USD');
-        $this->rateTo(Currency::EUR())->shouldReturn(1 / Currency::RATE_EUR_USD);
-    }
-
-    function it_returns_exchange_rate_from_JPY_to_EUR()
-    {
-        $this->beConstructedThrough('JPY');
-        $this->rateTo(Currency::EUR())->shouldReturn(1 / Currency::RATE_EUR_JPY);
-    }
-
-    function it_returns_exchange_rate_from_USD_to_JPY()
-    {
-        $this->beConstructedThrough('USD');
-        $this->rateTo(Currency::JPY())->shouldReturn(1 / Currency::RATE_EUR_USD * Currency::RATE_EUR_JPY);
-    }
-
-    function it_returns_exchange_rate_from_JPY_to_USD()
-    {
-        $this->beConstructedThrough('JPY');
-        $this->rateTo(Currency::USD())->shouldReturn(1 / Currency::RATE_EUR_JPY * Currency::RATE_EUR_USD);
-    }
-
     function it_returns_2_decimal_places_precision_for_EUR()
     {
         $this->beConstructedThrough('EUR');

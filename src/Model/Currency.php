@@ -4,9 +4,6 @@ namespace App\Model;
 
 class Currency
 {
-    const RATE_EUR_USD = 1.1497;
-    const RATE_EUR_JPY = 129.53;
-
     const DECIMAL_PLACES = [
         'EUR' => 2,
         'USD' => 2,
@@ -35,7 +32,6 @@ class Currency
         return static::getInstance('EUR');
     }
 
-
     public static function JPY() : Currency
     {
         return static::getInstance('JPY');
@@ -49,19 +45,6 @@ class Currency
     public function getCode() : string
     {
         return $this->code;
-    }
-
-    public function rateTo(Currency $toCurrency)
-    {
-        $rate = 1.0;
-        if ($this->code !== 'EUR') {
-            $rate = 1.0 / Currency::EUR()->rateTo($this);
-        }
-        switch ($toCurrency->code) {
-            case 'USD': return $rate * static::RATE_EUR_USD;
-            case 'JPY': return $rate * static::RATE_EUR_JPY;
-            default: return $rate;
-        }
     }
 
     public function getDecimalPlaces() : int
