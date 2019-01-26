@@ -2,7 +2,9 @@
 
 namespace spec\App\Strategy;
 
+use App\Helper\EuroForex;
 use App\Model\Account;
+use App\Model\Currency;
 use App\Model\Transaction;
 use App\Strategy\CashInFeeStrategy;
 use App\Strategy\FeeStrategyInterface;
@@ -11,6 +13,13 @@ use Prophecy\Argument;
 
 class CashInFeeStrategySpec extends ObjectBehavior
 {
+    function let(EuroForex $euroForex)
+    {
+        $this->beConstructedWith($euroForex);
+
+        $euroForex->exchange(5.0, Currency::EUR(), Currency::EUR())->willReturn(5.0);
+    }
+
     function it_is_initializable()
     {
         $this->shouldHaveType(CashInFeeStrategy::class);
@@ -38,6 +47,7 @@ class CashInFeeStrategySpec extends ObjectBehavior
     function it_calculates_percentage_fee(Account $account, Transaction $transaction)
     {
         $transaction->getAmount()->willReturn(1000);
+        $transaction->getCurrency()->willReturn(Currency::EUR());
 
         $transaction->setFee(0.3)->shouldBeCalled();
 
@@ -47,8 +57,24 @@ class CashInFeeStrategySpec extends ObjectBehavior
     function it_caps_the_fee(Account $account, Transaction $transaction)
     {
         $transaction->getAmount()->willReturn(1000000);
+        $transaction->getCurrency()->willReturn(Currency::EUR());
 
         $transaction->setFee(5.0)->shouldBeCalled();
+
+        $this->calculateFee($account, $transaction);
+    }
+
+    function it_caps_the_fee_in_other_currencies_to_the_equivalent_value(
+        Account $account,
+        Transaction $transaction,
+        EuroForex $euroForex
+    ) {
+        $transaction->getAmount()->willReturn(1000000);
+        $transaction->getCurrency()->willReturn(Currency::USD());
+
+        $euroForex->exchange(5.0, Currency::EUR(), Currency::USD())->willReturn(5.7485);
+
+        $transaction->setFee(5.7485)->shouldBeCalled();
 
         $this->calculateFee($account, $transaction);
     }

@@ -2,7 +2,9 @@
 
 namespace spec\App\Strategy;
 
+use App\Helper\EuroForex;
 use App\Model\Account;
+use App\Model\Currency;
 use App\Model\Transaction;
 use App\Strategy\FeeStrategyInterface;
 use App\Strategy\LegalCashOutFeeStrategy;
@@ -11,6 +13,13 @@ use Prophecy\Argument;
 
 class LegalCashOutFeeStrategySpec extends ObjectBehavior
 {
+    function let(EuroForex $euroForex)
+    {
+        $this->beConstructedWith($euroForex);
+
+        $euroForex->exchange(0.5, Currency::EUR(), Currency::EUR())->willReturn(0.5);
+    }
+
     function it_is_initializable()
     {
         $this->shouldHaveType(LegalCashOutFeeStrategy::class);
@@ -57,6 +66,7 @@ class LegalCashOutFeeStrategySpec extends ObjectBehavior
         Account $account
     ) {
         $transaction->getAmount()->willReturn(5000);
+        $transaction->getCurrency()->willReturn(Currency::EUR());
 
         $transaction->setFee(15.0)->shouldBeCalled();
 
@@ -69,8 +79,25 @@ class LegalCashOutFeeStrategySpec extends ObjectBehavior
     )
     {
         $transaction->getAmount()->willReturn(10);
+        $transaction->getCurrency()->willReturn(Currency::EUR());
 
         $transaction->setFee(0.5)->shouldBeCalled();
+
+        $this->calculateFee($account, $transaction);
+    }
+
+    function it_applies_equivalent_minimum_fee_in_other_currencies(
+        Transaction $transaction,
+        Account $account,
+        EuroForex $euroForex
+    )
+    {
+        $transaction->getAmount()->willReturn(10);
+        $transaction->getCurrency()->willReturn(Currency::JPY());
+
+        $euroForex->exchange(0.5, Currency::EUR(), Currency::JPY())->willReturn(64.765);
+
+        $transaction->setFee(64.765)->shouldBeCalled();
 
         $this->calculateFee($account, $transaction);
     }
