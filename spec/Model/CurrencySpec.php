@@ -55,4 +55,22 @@ class CurrencySpec extends ObjectBehavior
         $this->beConstructedThrough('JPY');
         $this->rateTo(Currency::USD())->shouldReturn(1 / Currency::RATE_EUR_JPY * Currency::RATE_EUR_USD);
     }
+
+    function it_returns_2_decimal_places_precision_for_EUR()
+    {
+        $this->beConstructedThrough('EUR');
+        $this->getDecimalPlaces()->shouldReturn(2);
+    }
+
+    function it_returns_2_decimal_places_precision_for_USD()
+    {
+        $this->beConstructedThrough('USD');
+        $this->getDecimalPlaces()->shouldReturn(2);
+    }
+
+    function it_returns_0_decimal_places_precision_for_JPY()
+    {
+        $this->beConstructedThrough('JPY');
+        $this->getDecimalPlaces()->shouldReturn(0);
+    }
 }

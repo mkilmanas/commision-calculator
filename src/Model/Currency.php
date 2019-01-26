@@ -7,6 +7,12 @@ class Currency
     const RATE_EUR_USD = 1.1497;
     const RATE_EUR_JPY = 129.53;
 
+    const DECIMAL_PLACES = [
+        'EUR' => 2,
+        'USD' => 2,
+        'JPY' => 0,
+    ];
+
     private static $instances = [];
 
     private $code;
@@ -56,5 +62,10 @@ class Currency
             case 'JPY': return $rate * static::RATE_EUR_JPY;
             default: return $rate;
         }
+    }
+
+    public function getDecimalPlaces() : int
+    {
+        return self::DECIMAL_PLACES[$this->code];
     }
 }

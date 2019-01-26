@@ -3,8 +3,10 @@
 namespace spec\App;
 
 use App\CommissionCalculator;
+use App\Helper\CurrencyRounding;
 use App\Model\Account;
 use App\Model\AccountRegistry;
+use App\Model\Currency;
 use App\Model\Transaction;
 use App\Strategy\FeeStrategyInterface;
 use phpDocumentor\Reflection\DocBlock\Tags\Factory\Strategy;
@@ -13,9 +15,9 @@ use Prophecy\Argument;
 
 class CommissionCalculatorSpec extends ObjectBehavior
 {
-    function let(AccountRegistry $registry, FeeStrategyInterface $dummyStrategy)
+    function let(AccountRegistry $registry, CurrencyRounding $rounding, FeeStrategyInterface $dummyStrategy)
     {
-        $this->beConstructedWith($registry, [$dummyStrategy]);
+        $this->beConstructedWith($registry, $rounding, $dummyStrategy);
     }
 
     function it_is_initializable()
@@ -23,19 +25,21 @@ class CommissionCalculatorSpec extends ObjectBehavior
         $this->shouldHaveType(CommissionCalculator::class);
     }
 
-    function it_optionally_accepts_strategies_as_constructor_parameter(
+    function it_accepts_any_number_of_strategies_as_constructor_parameters(
         AccountRegistry $registry,
+        CurrencyRounding $rounding,
         FeeStrategyInterface $feeStrategyA,
         FeeStrategyInterface $feeStrategyB
     ) {
-        $this->beConstructedWith($registry, [$feeStrategyA, $feeStrategyB]);
+        $this->beConstructedWith($registry, $rounding, $feeStrategyA, $feeStrategyB);
         $this->shouldHaveType(CommissionCalculator::class);
     }
 
     function it_throws_exception_if_passing_an_invalid_strategy_parameter(
-        AccountRegistry $registry
+        AccountRegistry $registry,
+        CurrencyRounding $rounding
     ) {
-        $this->beConstructedWith($registry, [$registry]);
+        $this->beConstructedWith($registry, $rounding, $registry);
         $this->shouldThrow()->duringInstantiation();
     }
 
@@ -71,16 +75,19 @@ class CommissionCalculatorSpec extends ObjectBehavior
         $this->calculateFee($transaction);
     }
 
-    function it_iterates_over_all_strategies_until_it_finds_one_applicable_and_uses_it_for_calculation(
+    function it_iterates_over_strategies_to_find_applicable_one_and_uses_it_for_calculation(
         AccountRegistry $registry,
+        CurrencyRounding $rounding,
         Account $account,
         Transaction $transaction,
+        Currency $currency,
         FeeStrategyInterface $strategyA,
         FeeStrategyInterface $strategyB
     ) {
-        $this->beConstructedWith($registry, [$strategyA, $strategyB]);
+        $this->beConstructedWith($registry, $rounding, $strategyA, $strategyB);
 
         $transaction->getAccountId()->willReturn(29);
+
         $registry->find(29)->willReturn($account);
 
         $strategyA->isApplicable($account, $transaction)->willReturn(false);
@@ -88,6 +95,11 @@ class CommissionCalculatorSpec extends ObjectBehavior
 
         $strategyB->isApplicable($account, $transaction)->willReturn(true);
         $strategyB->calculateFee($account, $transaction)->shouldBeCalled();
+
+        $transaction->getFee()->willReturn(7.99);
+        $transaction->getCurrency()->willReturn($currency);
+        $rounding->roundUp(7.99, $currency)->willReturn(7.99);
+        $transaction->setFee(7.99)->shouldBeCalled();
 
         $this->calculateFee($transaction);
     }

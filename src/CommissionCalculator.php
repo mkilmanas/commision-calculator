@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Helper\CurrencyRounding;
 use App\Model\Account;
 use App\Model\AccountRegistry;
 use App\Model\Transaction;
@@ -22,24 +23,24 @@ class CommissionCalculator
      */
     private $strategies;
 
-    public function __construct(AccountRegistry $registry, array $strategies = [])
-    {
+    /**
+     * @var CurrencyRounding
+     */
+    private $rounding;
+
+    public function __construct(
+        AccountRegistry $registry,
+        CurrencyRounding $rounding,
+        Strategy\FeeStrategyInterface ...$strategies
+    ) {
         $this->registry = $registry;
 
         if (empty($strategies)) {
-            $this->strategies = [
-                new CashInFeeStrategy(),
-                new LegalCashOutFeeStrategy(),
-                new NaturalCashOutFeeStrategy(),
-            ];
-        } else {
-            foreach ($strategies as $strategy) {
-                if (!$strategy instanceof FeeStrategyInterface) {
-                    throw new \InvalidArgumentException("Excpected an instance of FeeStrategyInterface, but got " . get_class($strategy));
-                }
-            }
-            $this->strategies = $strategies;
+            throw new \InvalidArgumentException("Please provide some Fee Strategies for " . __CLASS__);
         }
+
+        $this->strategies = $strategies;
+        $this->rounding = $rounding;
     }
 
     public function calculateFee(Transaction $transaction)
@@ -54,6 +55,12 @@ class CommissionCalculator
             /** @var FeeStrategyInterface $strategy */
             if ($strategy->isApplicable($account, $transaction)) {
                 $strategy->calculateFee($account, $transaction);
+                $transaction->setFee(
+                    $this->rounding->roundUp(
+                        $transaction->getFee(),
+                        $transaction->getCurrency()
+                    )
+                );
                 break;
             }
         }

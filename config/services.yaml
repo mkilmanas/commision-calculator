@@ -29,3 +29,9 @@ services:
 
     App\CommissionCalculator:
         public: true
+        arguments:
+            - "@App\\Model\\AccountRegistry"
+            - "@App\\Helper\\CurrencyRounding"
+            - "@App\\Strategy\\CashInFeeStrategy"
+            - "@App\\Strategy\\LegalCashOutFeeStrategy"
+            - "@App\\Strategy\\NaturalCashOutFeeStrategy"
