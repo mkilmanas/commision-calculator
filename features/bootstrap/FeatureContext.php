@@ -71,7 +71,8 @@ class FeatureContext implements Context
             $expected = floatval($row['commission_fee']);
             $actual = $this->transactions[$i]->getFee();
             if (abs($expected - $actual) > 0.0001) {
-                throw new \Exception("Result mismatch: expected '{$row['commission_fee']}' but found {$actual}");
+                $transactionNo = $i+1;
+                throw new \Exception("Result mismatch: expected '{$row['commission_fee']}' but found '{$actual}' for transaction #{$transactionNo}");
             }
         }
     }

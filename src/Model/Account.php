@@ -55,7 +55,10 @@ class Account
 
     public function addTransaction(Transaction $transaction)
     {
-        $this->transactionHistory->set($transaction->getDate()->format('c'), $transaction);
+        $this->transactionHistory->set(
+            $transaction->getDate()->format('c') . spl_object_hash($transaction),
+            $transaction
+        );
         $transactions = $this->transactionHistory->toArray();
         ksort($transactions);
         $this->transactionHistory = new ArrayCollection($transactions);
