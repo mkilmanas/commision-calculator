@@ -24,7 +24,19 @@ From there on, anything you want to run should be done inside the VM, i.e. after
 
 ### Running the calculator
 
-TBD (not implemented yet)
+There is a Symfony Console command implemented which reads the input CSV file, performs the calculations and presents results to stdout.
+
+```bash
+bin/console commissions:calculate <file>
+```
+
+File path is relative to the directory from which the command is run.
+
+There is a [var/data/sample.csv](var/data/sample.csv) file which contains data from the given example.
+
+```bash
+bin/console commissions:calculate var/data/sample.csv
+```
 
 ### Running the tests
 
@@ -38,5 +50,3 @@ The behavioural tests (functional in this case) are done with [Behat](http://beh
 ```bash
 vendor/bin/behat
 ```
-
-**Note:** Until the solution is complete, some of behat tests are expected to fail - those are the remaining features to implement.
